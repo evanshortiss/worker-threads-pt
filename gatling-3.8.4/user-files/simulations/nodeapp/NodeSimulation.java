@@ -46,7 +46,7 @@ public class NodeSimulation extends Simulation {
             )
         );
 
-    ChainBuilder getHome =
+    ChainBuilder postSignup =
         repeat(1).on(
             exec(
                 http("Post /signup")
@@ -77,7 +77,7 @@ public class NodeSimulation extends Simulation {
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:16.0) Gecko/20100101 Firefox/16.0"
             );
 
-    ScenarioBuilder users = scenario("Users").exec(getHome, postXml);
+    ScenarioBuilder users = scenario("Users").exec(getHome, postSignup, postXml);
     {
         setUp(
             users.injectClosed(constantConcurrentUsers(500).during(10))
