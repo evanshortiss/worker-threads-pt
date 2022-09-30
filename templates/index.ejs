@@ -1,11 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
+<div class="grid-container">
+  <div class="grid-x grid-padding-x">
+    <div class="large-12 cell">
+      <h2>Worker Threads Sample Application!</h2>
+    </div>
+  </div>
 
-  </head>
-  <body>
-    <h1><%= header %></h1>
-    <p><%= text %></p>
-    <br/>
-  </body>
-</html>
+  <div class="grid-x grid-padding-x">
+    <form action="/signup" method="post">
+      <div class="grid-container">
+        <div class="grid-x grid-padding-x">
+          <div class="medium-6 cell">
+            <label>Username
+              <input required type="text" name="username" placeholder="A clever username">
+            </label>
+          </div>
+          <div class="medium-6 cell">
+            <label>Password
+              <input required type="password" name="password" placeholder="A strong password">
+            </label>
+          </div>
+          <div class="medium-6 cell">
+            <input class="submit success button" type="submit" value="Sign Up">
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

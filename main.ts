@@ -2,8 +2,10 @@ import fastify from 'fastify';
 import xmlPlugin, { XmlPluginOpts } from './xml-plugin';
 import getConfig from './config';
 import '@fastify/view'
+import { PointOfViewOptions } from '@fastify/view';
 
 const app = fastify()
+
 const {
   HTTP_HOST,
   HTTP_PORT,
@@ -14,7 +16,10 @@ app.register(require('@fastify/view'), {
   engine: {
     ejs: require('ejs'),
   },
-});
+  layout: 'templates/layouts/layout.ejs'
+} as PointOfViewOptions);
+
+app.register(require('@fastify/formbody'))
 
 app.register(
   xmlPlugin,
@@ -28,10 +33,27 @@ app.get('/', (req, res) => {
   });
 })
 
+app.get('/signup', (req, res) => {
+  res.view('/templates/index.ejs', {
+    header: 'Fun with Worker Threads',
+    text: 'Hello!'
+  });
+})
+
+app.post('/signup', (req, res) => {
+  const { username } = req.body as any
+  res.view('/templates/welcome.ejs', {
+    username
+  });
+})
+
 app.post('/upload', (req, res) => {
-  res.send({
-    data: Object.keys(req.body as any).length
-  })
+  const topLevelKeys = Object.keys(req.body as any)
+  const keyCount = topLevelKeys.reduce((prev, cur) => {
+    return prev + (req.body as any)[cur].length
+  }, 0)
+
+  res.send({ keyCount });
 })
 
 app.listen({

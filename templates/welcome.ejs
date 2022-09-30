@@ -1,0 +1,51 @@
+<h2>Welcome <%= username %>!</h2>
+<h4>Care to upload some XML?</h4>
+
+<div class="grid-container">
+  <div class="grid-x grid-padding-x">
+    <textarea name="xml-content" cols="30" rows="10">
+<xml>
+  <person>
+    <firstname>Luke</firstname>
+    <lastname>Skywalker</lastname>
+  </person>
+  <person>
+    <firstname>Rey</firstname>
+    <lastname>Skywalker</lastname>
+  </person>
+</xml>
+    </textarea>
+    <button class="submit button" onclick="uploadXml()">Upload</button>
+  </div>
+</div>
+
+<div id="xml-upload-response"></div>
+
+<script>
+  function uploadXml () {
+    const responseEl = document.getElementById('xml-upload-response')
+    const textareaEl = document.getElementsByName('xml-content').item(0)
+    const body = textareaEl.value
+    
+    fetch('/upload', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/xml'
+      },
+      body
+    })
+      .then(async (res) => {
+        const { status } = res
+        if (res.status === 200) {
+          const { keyCount } = await res.json()
+          responseEl.innerHTML = `Nice! You uploaded an XML document that contained ${keyCount} top-level child nodes`
+        } else {
+          alert(`XML upload error. Status code ${status}.`)
+        }
+      })
+      .catch((e) => {
+        console.error(e)
+        alert('XML upload error. Check console.')
+      });
+  }
+</script>

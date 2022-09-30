@@ -15,6 +15,7 @@
   "author": "Evan Shortiss",
   "license": "MIT",
   "dependencies": {
+    "@fastify/formbody": "^7.3.0",
     "@fastify/view": "~7.1.0",
     "ejs": "~3.1.8",
     "env-var": "~7.3.0",

@@ -7,7 +7,9 @@ const parserPool = pool(join(__dirname, 'xml-worker.js'), {
 })
 
 export function parseXmlSync (xml: string) {
-  return parse(xml)
+  return parse(xml, {
+    forceArrays: true
+  })
 }
 
 export function parseXmlAsync (xml: string) {
