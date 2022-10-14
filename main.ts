@@ -1,62 +1,34 @@
-import fastify from 'fastify';
-import xmlPlugin, { XmlPluginOpts } from './xml-plugin';
 import getConfig from './config';
-import '@fastify/view'
-import { PointOfViewOptions } from '@fastify/view';
+import cluster from 'node:cluster';
+import { cpus } from 'node:os';
+import process from 'node:process';
+import startServer from './server';
 
-const app = fastify()
+const config = getConfig(process.env)
+const { USE_WORKERS, USE_CLUSTER } = config
 
-const {
-  HTTP_HOST,
-  HTTP_PORT,
-  USE_WORKERS
-} = getConfig(process.env)
+if (USE_WORKERS && USE_CLUSTER) {
+  throw new Error('cannot set both USE_WORKERS and USE_CLUSTER to true')
+}
 
-app.register(require('@fastify/view'), {
-  engine: {
-    ejs: require('ejs'),
-  },
-  layout: 'templates/layouts/layout.ejs'
-} as PointOfViewOptions);
+if (USE_CLUSTER && cluster.isPrimary) {
+  console.log(`🚀 primary process started (PID: ${process.pid})`);
 
-app.register(require('@fastify/formbody'))
+  for (let i = 0; i < cpus().length; i++) {
+    cluster.fork();
+  }
 
-app.register(
-  xmlPlugin,
-  { async: USE_WORKERS } as XmlPluginOpts
-)
-
-app.get('/', (req, res) => {
-  res.view('/templates/index.ejs', {
-    header: 'Fun with Worker Threads',
-    text: 'Hello!'
+  cluster.on('fork', (worker) => {
+    console.log(`${Math.random() < 0.5 ? '👷' : '👷‍♀️'} worker process started (PID: ${worker.process.pid})`)
   });
-})
 
-app.get('/signup', (req, res) => {
-  res.view('/templates/index.ejs', {
-    header: 'Fun with Worker Threads',
-    text: 'Hello!'
+  cluster.on('exit', (worker, code, signal) => {
+    console.log('worker is dead:', worker.isDead());
   });
-})
+} else {
+  if (USE_WORKERS) {
+    console.log(`🚀 primary process started (PID: ${process.pid})`);
+  }
 
-app.post('/signup', (req, res) => {
-  const { username } = req.body as any
-  res.view('/templates/welcome.ejs', {
-    username
-  });
-})
-
-app.post('/upload', (req, res) => {
-  const topLevelKeys = Object.keys(req.body as any)
-  const keyCount = topLevelKeys.reduce((prev, cur) => {
-    return prev + (req.body as any)[cur].length
-  }, 0)
-
-  res.send({ keyCount });
-})
-
-app.listen({
-  host: HTTP_HOST,
-  port: HTTP_PORT
-})
+  startServer(config)
+}

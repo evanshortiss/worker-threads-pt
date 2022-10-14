@@ -38,7 +38,7 @@ public class NodeSimulation extends Simulation {
     }
 
     ChainBuilder getHome =
-        repeat(3).on(
+        repeat(1).on(
             exec(
                 http("Get /")
                     .get("/")
@@ -47,7 +47,7 @@ public class NodeSimulation extends Simulation {
         );
 
     ChainBuilder postSignup =
-        repeat(1).on(
+        repeat(2).on(
             exec(
                 http("Post /signup")
                     .post("/signup")
@@ -58,7 +58,7 @@ public class NodeSimulation extends Simulation {
         );
 
     ChainBuilder postXml = 
-        repeat(1).on(
+        repeat(2).on(
             exec(
                 http("Post /upload")
                     .post("/upload")
@@ -77,11 +77,19 @@ public class NodeSimulation extends Simulation {
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:16.0) Gecko/20100101 Firefox/16.0"
             );
 
-    ScenarioBuilder users = scenario("Users").exec(getHome, postSignup, postXml);
+    ScenarioBuilder nonUploadingUsers = scenario("Users").exec(getHome, postSignup, getHome);
+    ScenarioBuilder uploadingUsers = scenario("Uploading Users").exec(postXml);
+
     {
         setUp(
-            users.injectClosed(constantConcurrentUsers(500).during(10))
-            // users.injectOpen(rampUsers(5000).during(10))
+            nonUploadingUsers.injectOpen(
+                constantUsersPerSec(500).during(30)
+            ),
+            uploadingUsers.injectOpen(
+                constantUsersPerSec(10).during(10),
+                nothingFor(5),
+                constantUsersPerSec(10).during(15),
+            )
         ).protocols(httpProtocol);
     }
 }

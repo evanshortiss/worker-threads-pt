@@ -1,12 +1,14 @@
 import { FastifyPluginCallback } from 'fastify'
 import fp from 'fastify-plugin'
-import { parseXmlAsync, parseXmlSync } from './xml-parser'
+import { getParser } from './xml-parser'
 
 export type XmlPluginOpts = {
   async: boolean
 }
 
 const xmlParserFp: FastifyPluginCallback<XmlPluginOpts> = (fastify, options, done) => {
+  const parseXml = getParser(options.async)
+
   fastify.addContentTypeParser('text/xml', (req, payload, done) => {
     let buffer = ''
 
@@ -20,14 +22,14 @@ const xmlParserFp: FastifyPluginCallback<XmlPluginOpts> = (fastify, options, don
 
     payload.on('end', function onXmlPayloadEnd () {
       if (options.async) {
-        parseXmlAsync(buffer)
-          .then((xml) => done(null, xml))
+        parseXml(buffer)
+          .then((xml: any) => done(null, xml))
           .catch(done)
       } else {
         let result: any, err: any
 
         try {
-          result = parseXmlSync(buffer)
+          result = parseXml(buffer)
         } catch (e) {
           err = e
         }

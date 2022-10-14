@@ -6,9 +6,9 @@
   "scripts": {
     "build": "tsc",
     "dev": "nodemon main.ts",
-    "start": "node dist/main.js",
-    "start:async": "NODE_ENV=production USE_WORKERS=true node dist/main.js",
-    "start:sync": "NODE_ENV=production USE_WORKERS=false node dist/main.js",
+    "start": "NODE_ENV=production node dist/main.js",
+    "start:threaded": "NODE_ENV=production USE_WORKERS=true node dist/main.js",
+    "start:clustered": "NODE_ENV=production USE_CLUSTER=true node dist/main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

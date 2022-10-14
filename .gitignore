@@ -1,7 +1,8 @@
 .DS_Store
 
 # Gatling results
-gatling/results
+gatling-3.8.4/results/*
+gatling-3.8.4/target/*
 
 # Logs
 logs
